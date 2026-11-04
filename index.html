@@ -1,0 +1,275 @@
+<!-- Dashboard de ordens de serviço; filtros, indicadores, visualizações e importação local de XLSX. -->
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Indicadores e análises das ordens de serviço em aberto e encerradas."
+    />
+    <title>ServiFlow — Controle de serviços</title>
+    <link rel="stylesheet" href="index.css" />
+    <script src="index.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Navegação principal">
+        <a class="brand" href="#inicio" aria-label="ServiFlow, início">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M5 12.5 9.2 17 19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </span>
+          <span>servi<span class="brand-light">flow</span></span>
+        </a>
+
+        <div class="workspace-label">CONTROLE OPERACIONAL</div>
+        <nav class="main-nav">
+          <a class="nav-link active" href="#inicio">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5" /><rect x="13.5" y="3.5" width="7" height="7" rx="1.5" /><rect x="3.5" y="13.5" width="7" height="7" rx="1.5" /><rect x="13.5" y="13.5" width="7" height="7" rx="1.5" /></svg>
+            Visão geral
+          </a>
+          <a class="nav-link" href="#andamento">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5h11M8 12h11M8 18.5h11" /><path d="M4.5 5.5h.01M4.5 12h.01M4.5 18.5h.01" /></svg>
+            Ordens de serviço
+            <span class="nav-count" id="nav-open-count">0</span>
+          </a>
+          <a class="nav-link" href="#distribuicao">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5V12m5.3 7.5V5m5.4 14.5v-9m5.3 9V8" /></svg>
+            Polos e análises
+          </a>
+        </nav>
+
+        <div class="sidebar-bottom">
+          <div class="help-card">
+            <span class="help-icon" aria-hidden="true">i</span>
+            <strong>Dados no seu dispositivo</strong>
+            <p>As planilhas são lidas localmente e não são enviadas a um servidor.</p>
+            <span class="privacy-note"><span class="privacy-dot"></span> Importação privada</span>
+          </div>
+          <div class="sidebar-version">RELATÓRIO OPERACIONAL</div>
+        </div>
+      </aside>
+
+      <main class="main-content" id="inicio">
+        <header class="topbar">
+          <div class="breadcrumb"><span>Operação</span><span class="breadcrumb-slash">/</span><strong>Visão geral</strong></div>
+          <div class="topbar-actions">
+            <span class="today-label" id="report-date"></span>
+            <button class="button button-outline" id="open-import" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4m0 0L8 8m4-4 4 4M5 14v5h14v-5" /></svg>
+              Atualizar planilhas
+            </button>
+          </div>
+        </header>
+
+        <div class="page-content">
+          <section class="page-heading" aria-labelledby="page-title">
+            <div>
+              <p class="eyebrow">PAINEL DE CONTROLE</p>
+              <h1 id="page-title">Ordens de serviço</h1>
+              <p class="heading-subtitle" id="data-caption">Indicadores consolidados das listas em aberto e encerradas.</p>
+            </div>
+            <div class="source-badges" aria-label="Bases incluídas">
+              <span class="source-badge source-open"><i></i> CLista · em aberto</span>
+              <span class="source-badge source-closed"><i></i> ELista · encerrados</span>
+            </div>
+          </section>
+
+          <!-- Filtros globais aplicados em conjunto a todos os indicadores e gráficos. -->
+          <section class="filter-panel" aria-label="Filtros do dashboard">
+            <div class="filter-panel-heading">
+              <div><strong>Filtros</strong><span id="filter-summary">Importe as planilhas para filtrar os registros.</span></div>
+              <button class="clear-filters" id="clear-filters" type="button" disabled>Limpar filtros</button>
+            </div>
+            <div class="filters-grid">
+              <label class="dashboard-filter">Base
+                <select id="filter-source" disabled><option value="all">Todas as bases</option></select>
+              </label>
+              <label class="dashboard-filter">Polo (ATC)
+                <select id="filter-pole" disabled><option value="all">Todos os polos</option></select>
+              </label>
+              <label class="dashboard-filter">Mês de inserção
+                <select id="filter-month" disabled><option value="all">Todo o período</option></select>
+              </label>
+              <label class="dashboard-filter">Município
+                <select id="filter-city" disabled><option value="all">Todos os municípios</option></select>
+              </label>
+              <label class="dashboard-filter">Prioridade
+                <select id="filter-priority" disabled><option value="all">Todas</option></select>
+              </label>
+              <label class="dashboard-filter">Família
+                <select id="filter-family" disabled><option value="all">Todas as famílias</option></select>
+              </label>
+              <label class="dashboard-filter">Status da operação
+                <select id="filter-status" disabled><option value="all">Todos os status</option></select>
+              </label>
+            </div>
+            <p class="filter-hint" id="filter-hint">Selecione a CLista e a ELista para habilitar os filtros interativos.</p>
+          </section>
+
+          <!-- Indicadores agregados das listas abertas (CLista) e encerradas (ELista). -->
+          <section class="metrics-grid" id="andamento" aria-label="Indicadores principais">
+            <article class="metric-card">
+              <div class="metric-top"><span class="metric-label">Registros em aberto</span><span class="metric-icon icon-violet" aria-hidden="true">◷</span></div>
+              <div class="metric-value" id="metric-open">—</div>
+              <div class="metric-foot"><span id="metric-open-unique">— OS únicas</span><span>na CLista</span></div>
+            </article>
+            <article class="metric-card">
+              <div class="metric-top"><span class="metric-label">Registros encerrados</span><span class="metric-icon icon-green" aria-hidden="true">✓</span></div>
+              <div class="metric-value" id="metric-closed">—</div>
+              <div class="metric-foot"><span id="metric-closed-detail">—</span><span>na ELista</span></div>
+            </article>
+            <article class="metric-card metric-attention">
+              <div class="metric-top"><span class="metric-label">Em aberto fora do prazo</span><span class="metric-icon icon-orange" aria-hidden="true">!</span></div>
+              <div class="metric-value" id="metric-overdue">—</div>
+              <div class="metric-foot"><span class="trend trend-warning" id="metric-overdue-rate">—</span><span>dos registros abertos</span></div>
+            </article>
+            <article class="metric-card">
+              <div class="metric-top"><span class="metric-label">OS únicas nas duas bases</span><span class="metric-icon icon-blue" aria-hidden="true">▤</span></div>
+              <div class="metric-value" id="metric-unique">—</div>
+              <div class="metric-foot"><span id="metric-overlap">— em ambas</span><span>por número da OS</span></div>
+            </article>
+          </section>
+
+          <section class="insights-grid" aria-label="Principais insights">
+            <article class="insight-card insight-highlight">
+              <span class="insight-icon" aria-hidden="true">↗</span>
+              <div><span class="insight-label">PONTO DE ATENÇÃO</span><strong id="insight-overdue">Carregando análise...</strong><p id="insight-overdue-detail"></p></div>
+            </article>
+            <article class="insight-card">
+              <span class="insight-icon insight-icon-green" aria-hidden="true">⌖</span>
+              <div><span class="insight-label">MAIOR CONCENTRAÇÃO</span><strong id="insight-city">—</strong><p id="insight-city-detail"></p></div>
+            </article>
+            <article class="insight-card">
+              <span class="insight-icon insight-icon-blue" aria-hidden="true">▦</span>
+              <div><span class="insight-label">SERVIÇO MAIS FREQUENTE</span><strong id="insight-family">—</strong><p id="insight-family-detail"></p></div>
+            </article>
+            <article class="insight-card insight-quality">
+              <span class="insight-icon insight-icon-blue" aria-hidden="true">◷</span>
+              <div><span class="insight-label">QUALIDADE DO CADASTRO</span><strong id="insight-schedule">—</strong><p id="insight-schedule-detail"></p></div>
+            </article>
+          </section>
+
+          <section class="chart-card" id="desempenho" aria-labelledby="trend-title">
+            <div class="section-heading chart-heading">
+              <div>
+                <h2 id="trend-title">Ordens por mês de inserção</h2>
+                <p>Comparativo de registros nas duas listas, agrupados pela data de inserção</p>
+              </div>
+              <label class="select-wrap">
+                <span class="sr-only">Período do gráfico</span>
+                <select id="trend-period" aria-label="Período do gráfico">
+                  <option value="12">Últimos 12 meses</option>
+                  <option value="6">Últimos 6 meses</option>
+                  <option value="all">Todo o período</option>
+                </select>
+                <span class="select-chevron" aria-hidden="true">⌄</span>
+              </label>
+            </div>
+            <div class="chart-legend">
+              <span><i class="legend-dot legend-purple"></i> CLista · em aberto</span>
+              <span><i class="legend-dot legend-green"></i> ELista · encerrados</span>
+            </div>
+            <div class="trend-chart-wrap">
+              <div class="trend-y-axis" id="trend-y-axis" aria-hidden="true"></div>
+              <div class="trend-plot">
+                <div class="trend-gridlines" id="trend-gridlines" aria-hidden="true"></div>
+                <svg class="trend-svg" id="trend-chart" viewBox="0 0 800 200" preserveAspectRatio="none" role="img" aria-label="Ordens de serviço por mês de inserção"></svg>
+                <div class="trend-x-axis" id="trend-x-axis" aria-hidden="true"></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Gráficos comparativos e operacionais por dimensão da planilha. -->
+          <section class="charts-grid" id="distribuicao" aria-label="Distribuição das ordens de serviço">
+            <article class="chart-card breakdown-card">
+              <div class="section-heading">
+                <div><h2>Ordens por polo (ATC)</h2><p>Comparativo de registros em aberto e encerrados por polo operacional</p></div>
+              </div>
+              <div class="paired-legend"><span><i class="legend-dot legend-purple"></i> Em aberto</span><span><i class="legend-dot legend-green"></i> Encerrados</span></div>
+              <div class="paired-bars" id="pole-chart"></div>
+            </article>
+            <article class="chart-card breakdown-card">
+              <div class="section-heading">
+                <div><h2>Principais famílias de serviço</h2><p>Comparativo entre registros abertos e encerrados</p></div>
+              </div>
+              <div class="paired-legend"><span><i class="legend-dot legend-purple"></i> Em aberto</span><span><i class="legend-dot legend-green"></i> Encerrados</span></div>
+              <div class="paired-bars" id="family-chart"></div>
+            </article>
+            <article class="chart-card breakdown-card">
+              <div class="section-heading">
+                <div><h2>Status das ordens abertas</h2><p>Distribuição por status da operação</p></div>
+              </div>
+              <div class="single-bars" id="status-chart"></div>
+            </article>
+            <article class="chart-card breakdown-card">
+              <div class="section-heading">
+                <div><h2>Prioridade</h2><p>Registros separados por prioridade em cada lista</p></div>
+              </div>
+              <div class="paired-legend"><span><i class="legend-dot legend-purple"></i> Em aberto</span><span><i class="legend-dot legend-green"></i> Encerrados</span></div>
+              <div class="paired-bars" id="priority-chart"></div>
+            </article>
+            <article class="chart-card breakdown-card">
+              <div class="section-heading">
+                <div><h2>Ordens por município</h2><p>Municípios com maior volume nas duas listas</p></div>
+              </div>
+              <div class="paired-legend"><span><i class="legend-dot legend-purple"></i> Em aberto</span><span><i class="legend-dot legend-green"></i> Encerrados</span></div>
+              <div class="paired-bars" id="municipality-chart"></div>
+            </article>
+            <article class="chart-card breakdown-card">
+              <div class="section-heading">
+                <div><h2>Origem da solicitação</h2><p>Iniciativa do cliente ou administrativa</p></div>
+              </div>
+              <div class="paired-legend"><span><i class="legend-dot legend-purple"></i> Em aberto</span><span><i class="legend-dot legend-green"></i> Encerrados</span></div>
+              <div class="paired-bars" id="initiative-chart"></div>
+            </article>
+            <article class="chart-card breakdown-card">
+              <div class="section-heading">
+                <div><h2>Tipos de serviço (TSS)</h2><p>Atividades mais registradas nas duas listas</p></div>
+              </div>
+              <div class="paired-legend"><span><i class="legend-dot legend-purple"></i> Em aberto</span><span><i class="legend-dot legend-green"></i> Encerrados</span></div>
+              <div class="paired-bars" id="tss-chart"></div>
+            </article>
+            <article class="chart-card breakdown-card">
+              <div class="section-heading">
+                <div><h2>Tempo de atraso</h2><p>Ordens abertas agrupadas pelo prazo vencido</p></div>
+              </div>
+              <div class="single-bars" id="aging-chart"></div>
+            </article>
+            <article class="chart-card breakdown-card">
+              <div class="section-heading">
+                <div><h2>Causas de encerramento</h2><p>Principais causas informadas na ELista</p></div>
+              </div>
+              <div class="single-bars" id="cause-chart"></div>
+            </article>
+          </section>
+
+          <section class="data-note">
+            <span class="data-note-icon" aria-hidden="true">i</span>
+            <p><strong>Como interpretar:</strong> os totais contam registros das planilhas, que podem conter mais de uma linha para a mesma OS. O indicador de OS únicas considera o campo “Número OS”. O atraso é calculado pela “Prazo de Execução - Fim” da CLista comparado à data de hoje. O gráfico mensal usa “Data Inserção” nas duas listas, não a data de encerramento.</p>
+          </section>
+
+          <footer class="page-footer"><span>© <span id="current-year"></span> ServiFlow</span><span id="source-files">Base de demonstração das planilhas recebidas</span></footer>
+        </div>
+      </main>
+    </div>
+
+    <!-- A importação e a leitura das planilhas ocorrem somente neste navegador. -->
+    <dialog class="import-dialog" id="import-dialog" aria-labelledby="import-title">
+      <form class="import-form" id="import-form">
+        <div class="dialog-heading">
+          <div><span class="dialog-kicker">ATUALIZAR INDICADORES</span><h2 id="import-title">Importar planilhas</h2><p>Selecione os arquivos XLSX das duas listas.</p></div>
+          <button class="dialog-close" type="button" id="close-import" aria-label="Fechar">×</button>
+        </div>
+        <label class="file-field">CLista — ordens em aberto<input id="open-file" type="file" accept=".xlsx" required /><span class="file-hint" id="open-file-name">Selecione o arquivo CLista (.xlsx)</span></label>
+        <label class="file-field">ELista — ordens encerradas<input id="closed-file" type="file" accept=".xlsx" required /><span class="file-hint" id="closed-file-name">Selecione o arquivo ELista (.xlsx)</span></label>
+        <p class="privacy-callout"><span class="privacy-dot"></span> A leitura e os cálculos acontecem neste navegador. Nenhum dado é enviado.</p>
+        <p class="import-error" id="import-error" role="alert" hidden></p>
+        <div class="dialog-actions"><button class="button button-secondary" type="button" id="cancel-import">Cancelar</button><button class="button button-primary" type="submit" id="submit-import">Gerar indicadores</button></div>
+      </form>
+    </dialog>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>
