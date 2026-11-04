@@ -8,20 +8,43 @@
       name="description"
       content="Indicadores e análises das ordens de serviço em aberto e encerradas."
     />
-    <title>ServiFlow — Controle de serviços</title>
+    <title>Carteira de serviço OSM</title>
     <link rel="stylesheet" href="index.css" />
+    <script src="auth-config.js" defer></script>
+    <script
+      defer
+      crossorigin="anonymous"
+      src="https://proud-ostrich-1142.clerk.accounts.dev/npm/@clerk/ui@1/dist/ui.browser.js"
+      type="text/javascript"
+    ></script>
     <script src="index.js" defer></script>
   </head>
   <body>
-    <div class="app-shell">
+    <main class="access-gate" id="access-gate">
+      <a class="brand access-brand" href="#inicio" aria-label="Carteira de serviço OSM">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M5 12.5 9.2 17 19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
+        <span>Carteira <span class="brand-light">OSM</span></span>
+      </a>
+      <h1>Acesso restrito</h1>
+      <p id="access-status" role="status">Verificando acesso...</p>
+      <div class="access-actions">
+        <button class="button button-primary" id="sign-in" type="button" disabled>Entrar</button>
+        <button class="button button-secondary" id="access-sign-out" type="button" hidden>Sair</button>
+      </div>
+    </main>
+    <div class="app-shell" id="app-shell" hidden>
       <aside class="sidebar" aria-label="Navegação principal">
-        <a class="brand" href="#inicio" aria-label="ServiFlow, início">
+        <a class="brand" href="#inicio" aria-label="Carteira de serviço OSM, início">
           <span class="brand-mark" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none">
               <path d="M5 12.5 9.2 17 19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
           </span>
-          <span>servi<span class="brand-light">flow</span></span>
+          <span>Carteira <span class="brand-light">OSM</span></span>
         </a>
 
         <div class="workspace-label">CONTROLE OPERACIONAL</div>
@@ -44,9 +67,9 @@
         <div class="sidebar-bottom">
           <div class="help-card">
             <span class="help-icon" aria-hidden="true">i</span>
-            <strong>Dados no seu dispositivo</strong>
-            <p>As planilhas são lidas localmente e não são enviadas a um servidor.</p>
-            <span class="privacy-note"><span class="privacy-dot"></span> Importação privada</span>
+            <strong>Dados em acesso restrito</strong>
+            <p>As planilhas ficam em banco privado e são acessíveis apenas a contas autorizadas.</p>
+            <span class="privacy-note"><span class="privacy-dot"></span> Consulta autenticada</span>
           </div>
           <div class="sidebar-version">RELATÓRIO OPERACIONAL</div>
         </div>
@@ -57,10 +80,11 @@
           <div class="breadcrumb"><span>Operação</span><span class="breadcrumb-slash">/</span><strong>Visão geral</strong></div>
           <div class="topbar-actions">
             <span class="today-label" id="report-date"></span>
-            <button class="button button-outline" id="open-import" type="button">
+            <button class="button button-outline is-locked" id="open-import" type="button" aria-disabled="true" title="Entre com a conta administrativa para atualizar as planilhas">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4m0 0L8 8m4-4 4 4M5 14v5h14v-5" /></svg>
               Atualizar planilhas
             </button>
+            <button class="button button-secondary" id="admin-sign-out" type="button" hidden>Sair</button>
           </div>
         </header>
 
@@ -85,28 +109,28 @@
             </div>
             <div class="filters-grid">
               <label class="dashboard-filter">Base
-                <select id="filter-source" disabled><option value="all">Todas as bases</option></select>
+                <select id="filter-source"><option value="all">Todas as bases</option></select>
               </label>
               <label class="dashboard-filter">Polo (ATC)
-                <select id="filter-pole" disabled><option value="all">Todos os polos</option></select>
+                <select id="filter-pole"><option value="all">Todos os polos</option></select>
               </label>
               <label class="dashboard-filter">Mês de inserção
-                <select id="filter-month" disabled><option value="all">Todo o período</option></select>
+                <select id="filter-month"><option value="all">Todo o período</option></select>
               </label>
               <label class="dashboard-filter">Município
-                <select id="filter-city" disabled><option value="all">Todos os municípios</option></select>
+                <select id="filter-city"><option value="all">Todos os municípios</option></select>
               </label>
               <label class="dashboard-filter">Prioridade
-                <select id="filter-priority" disabled><option value="all">Todas</option></select>
+                <select id="filter-priority"><option value="all">Todas</option></select>
               </label>
               <label class="dashboard-filter">Família
-                <select id="filter-family" disabled><option value="all">Todas as famílias</option></select>
+                <select id="filter-family"><option value="all">Todas as famílias</option></select>
               </label>
               <label class="dashboard-filter">Status da operação
-                <select id="filter-status" disabled><option value="all">Todos os status</option></select>
+                <select id="filter-status"><option value="all">Todos os status</option></select>
               </label>
             </div>
-            <p class="filter-hint" id="filter-hint">Selecione a CLista e a ELista para habilitar os filtros interativos.</p>
+            <p class="filter-hint" id="filter-hint">Os filtros atuam no gráfico correspondente; os dados resumidos não permitem cruzar dimensões. Importe as planilhas para filtros globais.</p>
           </section>
 
           <!-- Indicadores agregados das listas abertas (CLista) e encerradas (ELista). -->
@@ -127,7 +151,7 @@
               <div class="metric-foot"><span class="trend trend-warning" id="metric-overdue-rate">—</span><span>dos registros abertos</span></div>
             </article>
             <article class="metric-card">
-              <div class="metric-top"><span class="metric-label">OS únicas nas duas bases</span><span class="metric-icon icon-blue" aria-hidden="true">▤</span></div>
+              <div class="metric-top"><span class="metric-label" id="metric-unique-label">OS únicas nas duas bases</span><span class="metric-icon icon-blue" aria-hidden="true">▤</span></div>
               <div class="metric-value" id="metric-unique">—</div>
               <div class="metric-foot"><span id="metric-overlap">— em ambas</span><span>por número da OS</span></div>
             </article>
@@ -251,21 +275,21 @@
             <p><strong>Como interpretar:</strong> os totais contam registros das planilhas, que podem conter mais de uma linha para a mesma OS. O indicador de OS únicas considera o campo “Número OS”. O atraso é calculado pela “Prazo de Execução - Fim” da CLista comparado à data de hoje. O gráfico mensal usa “Data Inserção” nas duas listas, não a data de encerramento.</p>
           </section>
 
-          <footer class="page-footer"><span>© <span id="current-year"></span> ServiFlow</span><span id="source-files">Base de demonstração das planilhas recebidas</span></footer>
+          <footer class="page-footer"><span>© <span id="current-year"></span> Carteira de serviço OSM</span><span id="source-files">Base de demonstração das planilhas recebidas</span></footer>
         </div>
       </main>
     </div>
 
-    <!-- A importação e a leitura das planilhas ocorrem somente neste navegador. -->
+    <!-- A importação requer autenticação administrativa e grava os dados no banco privado. -->
     <dialog class="import-dialog" id="import-dialog" aria-labelledby="import-title">
       <form class="import-form" id="import-form">
         <div class="dialog-heading">
-          <div><span class="dialog-kicker">ATUALIZAR INDICADORES</span><h2 id="import-title">Importar planilhas</h2><p>Selecione os arquivos XLSX das duas listas.</p></div>
+          <div><span class="dialog-kicker">ATUALIZAR INDICADORES</span><h2 id="import-title">Importar planilhas</h2><p>Os registros serão armazenados no banco privado e ficarão disponíveis às contas autorizadas.</p></div>
           <button class="dialog-close" type="button" id="close-import" aria-label="Fechar">×</button>
         </div>
         <label class="file-field">CLista — ordens em aberto<input id="open-file" type="file" accept=".xlsx" required /><span class="file-hint" id="open-file-name">Selecione o arquivo CLista (.xlsx)</span></label>
         <label class="file-field">ELista — ordens encerradas<input id="closed-file" type="file" accept=".xlsx" required /><span class="file-hint" id="closed-file-name">Selecione o arquivo ELista (.xlsx)</span></label>
-        <p class="privacy-callout"><span class="privacy-dot"></span> A leitura e os cálculos acontecem neste navegador. Nenhum dado é enviado.</p>
+        <p class="privacy-callout"><span class="privacy-dot"></span> Dados protegidos por autenticação e armazenados no PostgreSQL privado configurado na Vercel.</p>
         <p class="import-error" id="import-error" role="alert" hidden></p>
         <div class="dialog-actions"><button class="button button-secondary" type="button" id="cancel-import">Cancelar</button><button class="button button-primary" type="submit" id="submit-import">Gerar indicadores</button></div>
       </form>

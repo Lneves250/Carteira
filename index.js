@@ -1,10 +1,4 @@
 // Processa as planilhas localmente e atualiza filtros, indicadores e gráficos.
-const monthRows = (rows) =>
-  Object.entries(rows).map(([month, count]) => ({ month, count }));
-
-const groupRows = (rows) =>
-  rows.map(([label, count]) => ({ label, count }));
-
 const atcPoles = new Map([
   ["924", "CAMPO LIMPO"],
   ["286", "DIADEMA"],
@@ -45,108 +39,40 @@ const poleAtcCodes = new Map([
 
 const initialData = {
   open: {
-    rows: 2811,
-    uniqueOrders: 2756,
-    overdue: 1169,
-    missingScheduled: 2811,
-    poles: groupRows([
-      ["CAMPO LIMPO", 476], ["DIADEMA", 218], ["EMBU", 289], ["GRAJAÚ", 439],
-      ["INTERLAGOS", 467], ["SANTO AMARO", 562], ["SBC", 356], ["NÃO MAPEADO", 4],
-    ]).map((pole) => ({
-      ...pole,
-      atcs: pole.label === "NÃO MAPEADO"
-        ? ["70", "915", "957"]
-        : poleAtcCodes.get(pole.label),
-    })),
-    months: monthRows({
-      "2025-08": 1, "2025-09": 6, "2025-10": 9, "2025-11": 16,
-      "2025-12": 8, "2026-01": 2, "2026-02": 5, "2026-03": 1,
-      "2026-04": 10, "2026-05": 21, "2026-06": 25, "2026-07": 36,
-      "2026-08": 40, "2026-09": 178, "2026-10": 1700, "2026-11": 753,
-    }),
-    families: groupRows([
-      ["REPOSIÇÃO", 514], ["SUPRESSÃO A PEDIDO", 431], ["VISTORIA", 398],
-      ["LIGAÇÃO DE ÁGUA", 218], ["VAZAMENTO DE ÁGUA", 181], ["PI, PV, TL", 163],
-      ["LIGAÇÃO DE ESGOTO", 146], ["OUTROS SERVIÇOS DE ÁGUA", 132],
-    ]),
-    cities: groupRows([
-      ["SÃO PAULO", 1867], ["SÃO BERNARDO DO CAMPO", 311], ["DIADEMA", 218],
-      ["EMBU", 141], ["ITAPECERICA DA SERRA", 99], ["EMBU-GUACU", 81],
-      ["JUQUITIBA", 32], ["RIBEIRÃO PIRES", 28],
-    ]),
-    priorities: groupRows([["NORMAL", 2630], ["URGÊNCIA", 173], ["ATENÇÃO", 8]]),
-    initiative: groupRows([["INICIATIVA CLIENTE", 1563], ["INICIATIVA ADMINISTRATIVA", 1248]]),
-    tss: groupRows([
-      ["SUPRIMIR LIG AGUA ENCERRAMENTO CONTRATO", 289],
-      ["VISTORIA DE IDENTIFICAR RESPONSABILIDADE", 195],
-      ["SUPRIMIR LIGAÇÃO DE AGUA POR IMOVEL VAGO", 139],
-      ["REPOR ASFALTO", 128],
-      ["NIVELAR POÇO DE INSPEÇÃO/VISITA", 81],
-      ["VISTORIA DE SINISTRO", 78],
-      ["LIGAÇÃO DE ÁGUA - PROG AGUA LEGAL", 73],
-      ["LIGAÇÃO DE ESGOTO - PROG AGUA LEGAL", 71],
-    ]),
-    aging: groupRows([
-      ["1 a 7 dias", 510], ["8 a 30 dias", 330], ["31 a 90 dias", 197], ["Mais de 90 dias", 132],
-    ]),
-    statuses: groupRows([
-      ["Planejável", 961], ["Despachada", 950], ["Reprogramável", 390],
-      ["Validada", 221], ["Suspensa", 183], ["Planejada", 101],
-      ["OS Admitida", 3], ["Em Execução", 2],
-    ]),
+    rows: 0,
+    uniqueOrders: 0,
+    overdue: 0,
+    missingScheduled: 0,
+    poles: [],
+    months: [],
+    families: [],
+    cities: [],
+    priorities: [],
+    initiative: [],
+    tss: [],
+    aging: [],
+    statuses: [],
   },
   closed: {
-    rows: 4969,
-    uniqueOrders: 3911,
-    closed: 4968,
-    cancelled: 1,
-    missingScheduled: 4969,
-    poles: groupRows([
-      ["CAMPO LIMPO", 845], ["DIADEMA", 431], ["EMBU", 585], ["GRAJAÚ", 374],
-      ["INTERLAGOS", 403], ["SANTO AMARO", 1092], ["SBC", 1239],
-    ]).map((pole) => ({ ...pole, atcs: poleAtcCodes.get(pole.label) })),
-    months: monthRows({
-      "2026-01": 20, "2026-02": 13, "2026-03": 5, "2026-06": 4,
-      "2026-08": 1, "2026-09": 12, "2026-10": 4221, "2026-11": 693,
-    }),
-    families: groupRows([
-      ["CAVALETE", 655], ["REPOSIÇÃO", 651], ["OUTROS SERVIÇOS DE REPOSIÇÃO", 523],
-      ["REATIV/RELIG/RESTAB", 418], ["DESOBSTRUÇÃO", 415],
-      ["VAZAMENTO DE ÁGUA", 410], ["HIDRÔMETRO", 320], ["SUPRESSÃO A PEDIDO", 316],
-    ]),
-    cities: groupRows([
-      ["SÃO PAULO", 2653], ["SÃO BERNARDO DO CAMPO", 950], ["DIADEMA", 431],
-      ["EMBU", 339], ["ITAPECERICA DA SERRA", 216], ["RIBEIRÃO PIRES", 184],
-      ["RIO GRANDE DA SERRA", 105], ["EMBU-GUACU", 61],
-    ]),
-    priorities: groupRows([["NORMAL", 4494], ["URGÊNCIA", 468], ["ATENÇÃO", 7]]),
-    initiative: groupRows([["INICIATIVA CLIENTE", 2667], ["INICIATIVA ADMINISTRATIVA", 2302]]),
-    tss: groupRows([
-      ["REATIVAR LIGAÇÃO DE ÁGUA S/V", 279],
-      ["SUPRIMIR LIG AGUA ENCERRAMENTO CONTRATO", 232],
-      ["CAVALETE VAZANDO", 208],
-      ["FALTA DE ÁGUA LOCAL", 199],
-      ["DESOBSTRUIR REDE DE ESGOTO", 188],
-      ["VISTORIA DE IDENTIFICAR RESPONSABILIDADE", 179],
-      ["COMPACTAR E SELAR BASE", 151],
-      ["VAZAMENTO DE ÁGUA LEITO PAVIMENTADO", 141],
-    ]),
-    causes: groupRows([
-      ["TRATA-SE DE OUTRO SERVIÇO", 417],
-      ["IMÓVEL FECHADO, ORDEM ENCERRADA", 377],
-      ["VISTORIADO LOCAL E IDENTIFICADA SITUAÇÃO", 262],
-      ["REATIVADA LIGAÇÃO DE ÁGUA S/V", 219],
-      ["REPARO DE CAVALETE", 218],
-      ["NADA CONSTA NO LOCAL", 188],
-      ["SUPRIMIDA LIG AGUA ENCERRAMENTO CONTRATO", 168],
-      ["DUPLICIDADE", 150],
-    ]),
-    statuses: groupRows([["Fechada", 4968], ["Cancelada", 1]]),
+    rows: 0,
+    uniqueOrders: 0,
+    closed: 0,
+    cancelled: 0,
+    missingScheduled: 0,
+    poles: [],
+    months: [],
+    families: [],
+    cities: [],
+    priorities: [],
+    initiative: [],
+    tss: [],
+    causes: [],
+    statuses: [],
   },
-  overlap: 390,
-  combinedUnique: 6277,
-  asOf: new Date(2026, 10, 3),
-  files: ["56421-CLista_OS_20261103_080922.xlsx", "56421-ELista_OS_20261103_083317.xlsx"],
+  overlap: 0,
+  combinedUnique: 0,
+  asOf: new Date(),
+  files: [],
 };
 
 let dashboardData = initialData;
@@ -172,15 +98,153 @@ const elements = {
     status: document.querySelector("#filter-status"),
   },
   importDialog: document.querySelector("#import-dialog"),
+  openImport: document.querySelector("#open-import"),
+  adminSignOut: document.querySelector("#admin-sign-out"),
   importForm: document.querySelector("#import-form"),
   openFile: document.querySelector("#open-file"),
   closedFile: document.querySelector("#closed-file"),
   importError: document.querySelector("#import-error"),
   submitImport: document.querySelector("#submit-import"),
   toast: document.querySelector("#toast"),
+  appShell: document.querySelector("#app-shell"),
+  accessGate: document.querySelector("#access-gate"),
+  accessStatus: document.querySelector("#access-status"),
+  signIn: document.querySelector("#sign-in"),
+  accessSignOut: document.querySelector("#access-sign-out"),
 };
 
 const numberFormat = new Intl.NumberFormat("pt-BR");
+let clerkClient;
+let isAdmin = false;
+
+async function dashboardRequest(method = "GET", data) {
+  const token = await clerkClient.session?.getToken();
+  if (!token) throw new Error("Sua sessão expirou. Entre novamente.");
+
+  const response = await fetch("/api/dashboard-data", {
+    method,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      ...(data ? { "Content-Type": "application/json" } : {}),
+    },
+    ...(data ? { body: JSON.stringify(data) } : {}),
+  });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const error = new Error(result.error || "Não foi possível acessar os dados do dashboard.");
+    error.status = response.status;
+    throw error;
+  }
+  return result;
+}
+
+function showAccessGate(message, signedIn = false) {
+  elements.accessGate.hidden = false;
+  elements.appShell.hidden = true;
+  elements.accessStatus.textContent = message;
+  elements.signIn.hidden = signedIn;
+  elements.signIn.disabled = signedIn || !clerkClient;
+  elements.accessSignOut.hidden = !signedIn;
+}
+
+function hydrateDashboardData(data) {
+  if (!data || !Array.isArray(data.records) || !data.open || !data.closed) {
+    throw new Error("Os dados armazenados estão incompletos ou inválidos.");
+  }
+  return {
+    ...data,
+    asOf: new Date(data.asOf),
+    records: data.records.map((record) => ({
+      ...record,
+      deadline: record.deadline ? new Date(record.deadline) : null,
+    })),
+  };
+}
+
+async function updateAdminAccess(user) {
+  const config = window.ADMIN_AUTH_CONFIG;
+  isAdmin = Boolean(config?.adminUserId && user?.id === config.adminUserId);
+  elements.openImport.classList.toggle("is-locked", !isAdmin);
+  elements.openImport.setAttribute("aria-disabled", String(!isAdmin));
+  elements.openImport.title = isAdmin
+    ? "Publicar novas planilhas para usuários autorizados"
+    : "Somente a conta administrativa pode atualizar as planilhas";
+  elements.adminSignOut.hidden = !user;
+
+  if (!user) {
+    showAccessGate("Entre com uma conta autorizada para consultar o dashboard.");
+    return;
+  }
+
+  showAccessGate("Validando acesso à base privada...", true);
+  try {
+    const data = await dashboardRequest();
+    dashboardData = hydrateDashboardData(data);
+    enableDashboardFilters(dashboardData.records);
+    elements.accessGate.hidden = true;
+    elements.appShell.hidden = false;
+    renderDashboard();
+  } catch (error) {
+    if (error.status === 404 && isAdmin) {
+      dashboardData = initialData;
+      enableAggregateFilters();
+      elements.accessGate.hidden = true;
+      elements.appShell.hidden = false;
+      renderDashboard();
+      showToast("Importe as planilhas para iniciar a base privada.");
+      return;
+    }
+
+    const message = error.status === 403
+      ? "Sua conta não está autorizada para consultar esta base."
+      : error.status === 404
+        ? "Ainda não há uma base publicada. Peça ao administrador para importar as planilhas."
+        : error.message;
+    showAccessGate(message, true);
+  }
+}
+
+async function initializeAdminAuth() {
+  const config = window.ADMIN_AUTH_CONFIG;
+  if (
+    !config?.clerkPublishableKey ||
+    config.clerkPublishableKey === "YOUR_CLERK_PUBLISHABLE_KEY" ||
+    !config.adminUserId ||
+    config.adminUserId === "YOUR_CLERK_USER_ID"
+  ) {
+    showAccessGate("A autenticação ainda não foi configurada para este dashboard.");
+    return;
+  }
+
+  const script = document.createElement("script");
+  script.async = true;
+  script.src = "https://proud-ostrich-1142.clerk.accounts.dev/npm/@clerk/clerk-js@6/dist/clerk.browser.js";
+  script.setAttribute("data-clerk-publishable-key", config.clerkPublishableKey);
+  script.addEventListener("load", async () => {
+    try {
+      clerkClient = window.Clerk;
+      await clerkClient.load();
+      elements.signIn.disabled = false;
+      elements.signIn.addEventListener("click", () => clerkClient.openSignIn());
+      const signOut = async () => {
+        await clerkClient.signOut();
+      };
+      elements.adminSignOut.addEventListener("click", signOut);
+      elements.accessSignOut.addEventListener("click", signOut);
+      clerkClient.addListener(({ user }) => {
+        void updateAdminAccess(user);
+      });
+      await updateAdminAccess(clerkClient.user);
+    } catch (error) {
+      console.error("Não foi possível inicializar o acesso administrativo.", error);
+      showAccessGate("Não foi possível iniciar o login. Tente novamente mais tarde.");
+    }
+  });
+  script.addEventListener("error", () => {
+    showAccessGate("Não foi possível carregar o serviço de autenticação.");
+  });
+  document.head.append(script);
+}
 
 function showToast(message) {
   elements.toast.textContent = message;
@@ -331,10 +395,12 @@ function createSvgElement(tag, attributes = {}) {
   return element;
 }
 
-function renderTrendChart(open = dashboardData.open, closed = dashboardData.closed) {
+function renderTrendChart(open = dashboardData.open, closed = dashboardData.closed, filters = {}) {
   const allMonths = new Map();
   for (const [source, stats] of [["open", open], ["closed", closed]]) {
+    if (filters.source !== "all" && filters.source !== source) continue;
     for (const row of stats.months) {
+      if (filters.month !== "all" && filters.month !== row.month) continue;
       const current = allMonths.get(row.month) || { month: row.month, open: 0, closed: 0 };
       current[source] = row.count;
       allMonths.set(row.month, current);
@@ -552,45 +618,124 @@ function renderDashboard() {
   const totalUnique = combinedUnique;
   const filterValues = Object.values(elements.filters).map((select) => select.value);
   const activeFilters = filterValues.filter((value) => value !== "all").length;
+  const selected = Object.fromEntries(
+    Object.entries(elements.filters).map(([key, select]) => [key, select.value]),
+  );
+  const aggregateMetrics = hasImportedRecords ? null : getAggregateMetrics(selected);
+  const aggregateUnavailable = !hasImportedRecords && !aggregateMetrics;
 
   elements.filterPanel.classList.toggle("is-active", activeFilters > 0);
-  elements.clearFilters.disabled = !hasImportedRecords || activeFilters === 0;
+  elements.clearFilters.disabled = activeFilters === 0;
   elements.filterSummary.textContent = hasImportedRecords
     ? `${numberFormat.format(filtered.length)} de ${numberFormat.format(dashboardData.records.length)} registros no recorte atual.`
-    : "Importe as planilhas para filtrar os registros.";
+    : aggregateMetrics
+      ? `${numberFormat.format(aggregateMetrics.totalRows)} registros no recorte selecionado.`
+      : "Não é possível cruzar dimensões sem os registros detalhados.";
   elements.filterHint.textContent = hasImportedRecords
     ? activeFilters
       ? `${activeFilters} ${activeFilters === 1 ? "filtro aplicado" : "filtros aplicados"} · ${numberFormat.format(filtered.length)} registros correspondentes.`
       : "Filtros aplicados a todos os indicadores e gráficos."
-    : "Selecione a CLista e a ELista para habilitar os filtros interativos.";
+    : aggregateMetrics
+      ? "Os totais mudam com a base ou uma dimensão. OS únicas e atraso por recorte exigem as planilhas detalhadas."
+      : "Os totais de combinações entre dimensões não estão disponíveis nos dados resumidos. Limpe os filtros ou selecione uma dimensão.";
 
-  document.querySelector("#metric-open").textContent = numberFormat.format(open.rows);
-  document.querySelector("#metric-open-unique").textContent = `${numberFormat.format(open.uniqueOrders)} OS únicas`;
-  document.querySelector("#metric-closed").textContent = numberFormat.format(closed.rows);
-  document.querySelector("#metric-closed-detail").textContent =
-    `${numberFormat.format(closed.closed)} fechadas · ${numberFormat.format(closed.cancelled)} cancelada`;
-  document.querySelector("#metric-overdue").textContent = numberFormat.format(open.overdue);
-  document.querySelector("#metric-overdue-rate").textContent = percent(open.overdue, open.rows);
-  document.querySelector("#metric-unique").textContent = numberFormat.format(totalUnique);
-  document.querySelector("#metric-overlap").textContent = `${numberFormat.format(overlap)} em ambas`;
-  document.querySelector("#nav-open-count").textContent = numberFormat.format(open.rows);
-  document.querySelector("#data-caption").textContent =
-    `Dados de ${new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "long", year: "numeric" }).format(dashboardData.asOf)} · ${numberFormat.format(open.rows + closed.rows)} registros nas duas listas.`;
+  const displayMetric = (value) => value == null ? "—" : numberFormat.format(value);
+  document.querySelector("#metric-open").textContent = displayMetric(
+    aggregateUnavailable ? null : aggregateMetrics ? aggregateMetrics.openRows : open.rows,
+  );
+  document.querySelector("#metric-open-unique").textContent = aggregateUnavailable
+    ? "— OS únicas"
+    : aggregateMetrics
+    ? `${displayMetric(aggregateMetrics.openUnique)} OS únicas`
+    : `${numberFormat.format(open.uniqueOrders)} OS únicas`;
+  document.querySelector("#metric-closed").textContent = displayMetric(
+    aggregateUnavailable ? null : aggregateMetrics ? aggregateMetrics.closedRows : closed.rows,
+  );
+  document.querySelector("#metric-closed-detail").textContent = aggregateUnavailable
+    ? "Detalhe indisponível neste recorte"
+    : aggregateMetrics
+    ? aggregateMetrics.closedDetail || "Detalhe indisponível neste recorte"
+    : `${numberFormat.format(closed.closed)} fechadas · ${numberFormat.format(closed.cancelled)} cancelada`;
+  document.querySelector("#metric-overdue").textContent = displayMetric(
+    aggregateUnavailable ? null : aggregateMetrics ? aggregateMetrics.overdue : open.overdue,
+  );
+  document.querySelector("#metric-overdue-rate").textContent = aggregateUnavailable
+    ? "—"
+    : aggregateMetrics
+    ? aggregateMetrics.overdueRate ?? "—"
+    : percent(open.overdue, open.rows);
+  document.querySelector("#metric-unique").textContent = displayMetric(
+    aggregateUnavailable ? null : aggregateMetrics ? aggregateMetrics.unique : totalUnique,
+  );
+  document.querySelector("#metric-unique-label").textContent = aggregateUnavailable || (
+    aggregateMetrics && Object.values(selected).some((value) => value !== "all")
+  ) ? "OS únicas no recorte" : "OS únicas nas duas bases";
+  document.querySelector("#metric-overlap").textContent = aggregateUnavailable
+    ? "— em ambas"
+    : aggregateMetrics
+    ? `${displayMetric(aggregateMetrics.overlap)} em ambas`
+    : `${numberFormat.format(overlap)} em ambas`;
+  document.querySelector("#nav-open-count").textContent = displayMetric(
+    aggregateUnavailable ? null : aggregateMetrics ? aggregateMetrics.openRows : open.rows,
+  );
+  const formattedDate = new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(dashboardData.asOf);
+  document.querySelector("#data-caption").textContent = hasImportedRecords
+    ? `Dados de ${formattedDate} · ${numberFormat.format(filtered.length)} registros no recorte atual.`
+    : aggregateMetrics
+      ? `Dados de ${formattedDate} · ${numberFormat.format(aggregateMetrics.totalRows)} registros no recorte atual.`
+      : `Dados de ${formattedDate} · totais do recorte indisponíveis para combinações de filtros.`;
   document.querySelector("#report-date").textContent =
     `Base atualizada em ${new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", year: "numeric" }).format(dashboardData.asOf).replace(".", "")}`;
   document.querySelector("#source-files").textContent = dashboardData.files.join(" · ");
 
   renderInsights(open, closed);
-  renderTrendChart(open, closed);
-  renderPairedBars("pole-chart", mergePoles(open.poles, closed.poles));
-  renderPairedBars("family-chart", mergeGroups(open.families, closed.families));
-  renderSingleBars("status-chart", open.statuses);
-  renderPairedBars("priority-chart", mergeGroups(open.priorities, closed.priorities, 5));
-  renderPairedBars("municipality-chart", mergeGroups(open.cities, closed.cities));
-  renderPairedBars("initiative-chart", mergeGroups(open.initiative, closed.initiative, 5));
-  renderPairedBars("tss-chart", mergeGroups(open.tss, closed.tss));
-  renderSingleBars("aging-chart", open.aging);
-  renderSingleBars("cause-chart", closed.causes.slice(0, 8));
+  if (hasImportedRecords) {
+    renderTrendChart(open, closed);
+    renderPairedBars("pole-chart", mergePoles(open.poles, closed.poles));
+    renderPairedBars("family-chart", mergeGroups(open.families, closed.families));
+    renderSingleBars("status-chart", open.statuses);
+    renderPairedBars("priority-chart", mergeGroups(open.priorities, closed.priorities, 5));
+    renderPairedBars("municipality-chart", mergeGroups(open.cities, closed.cities));
+    renderPairedBars("initiative-chart", mergeGroups(open.initiative, closed.initiative, 5));
+    renderPairedBars("tss-chart", mergeGroups(open.tss, closed.tss));
+    renderSingleBars("aging-chart", open.aging);
+    renderSingleBars("cause-chart", closed.causes.slice(0, 8));
+    return;
+  }
+
+  renderTrendChart(open, closed, { source: selected.source, month: selected.month });
+  renderPairedBars("pole-chart", filterGroups(
+    filterSources(mergePoles(open.poles, closed.poles), selected.source),
+    selected.pole,
+  ));
+  renderPairedBars("family-chart", filterGroups(
+    filterSources(mergeGroups(open.families, closed.families), selected.source),
+    selected.family,
+  ));
+  const statuses = selected.source === "closed" ? closed.statuses : open.statuses;
+  renderSingleBars("status-chart", filterGroups(statuses, selected.status));
+  renderPairedBars("priority-chart", filterGroups(
+    filterSources(mergeGroups(open.priorities, closed.priorities, 5), selected.source),
+    selected.priority,
+  ));
+  renderPairedBars("municipality-chart", filterGroups(
+    filterSources(mergeGroups(open.cities, closed.cities), selected.source),
+    selected.city,
+  ));
+  renderPairedBars("initiative-chart", filterSources(
+    mergeGroups(open.initiative, closed.initiative, 5),
+    selected.source,
+  ));
+  renderPairedBars("tss-chart", filterSources(
+    mergeGroups(open.tss, closed.tss),
+    selected.source,
+  ));
+  renderSingleBars("aging-chart", selected.source === "closed" ? [] : open.aging);
+  renderSingleBars("cause-chart", selected.source === "open" ? [] : closed.causes.slice(0, 8));
 }
 
 function populateFilter(select, defaultLabel, options) {
@@ -634,6 +779,99 @@ function enableDashboardFilters(records) {
   populateFilter(elements.filters.priority, "Todas as prioridades", unique("priority"));
   populateFilter(elements.filters.family, "Todas as famílias", unique("family"));
   populateFilter(elements.filters.status, "Todos os status", unique("status"));
+}
+
+function enableAggregateFilters() {
+  const allMonths = [...new Set([...dashboardData.open.months, ...dashboardData.closed.months]
+    .map((row) => row.month))].sort((a, b) => b.localeCompare(a));
+  const allValues = (...groups) => [...new Set(groups.flatMap((group) => group.map((row) => row.label)))]
+    .sort((a, b) => a.localeCompare(b, "pt-BR"));
+
+  populateFilter(elements.filters.source, "Todas as bases", [
+    { value: "open", label: "CLista — em aberto" },
+    { value: "closed", label: "ELista — encerrados" },
+  ]);
+  populateFilter(elements.filters.pole, "Todos os polos", allValues(dashboardData.open.poles, dashboardData.closed.poles));
+  populateFilter(elements.filters.month, "Todo o período", allMonths.map((month) => ({
+    value: month,
+    label: formatMonth(month),
+  })));
+  populateFilter(elements.filters.city, "Todos os municípios", allValues(dashboardData.open.cities, dashboardData.closed.cities));
+  populateFilter(elements.filters.priority, "Todas as prioridades", allValues(dashboardData.open.priorities, dashboardData.closed.priorities));
+  populateFilter(elements.filters.family, "Todas as famílias", allValues(dashboardData.open.families, dashboardData.closed.families));
+  populateFilter(elements.filters.status, "Todos os status", allValues(dashboardData.open.statuses, dashboardData.closed.statuses));
+}
+
+function filterGroups(rows, value) {
+  return value === "all" ? rows : rows.filter((row) => row.label === value);
+}
+
+function filterSources(rows, source) {
+  if (source === "all") return rows;
+  return rows.map((row) => ({
+    ...row,
+    open: source === "open" ? row.open : 0,
+    closed: source === "closed" ? row.closed : 0,
+  }));
+}
+
+function getAggregateMetrics(selected) {
+  const dimensions = ["pole", "month", "city", "priority", "family", "status"]
+    .filter((key) => selected[key] !== "all");
+
+  if (dimensions.length > 1) return null;
+
+  if (!dimensions.length) {
+    const showOpen = selected.source !== "closed";
+    const showClosed = selected.source !== "open";
+    return {
+      openRows: showOpen ? dashboardData.open.rows : 0,
+      closedRows: showClosed ? dashboardData.closed.rows : 0,
+      openUnique: showOpen ? dashboardData.open.uniqueOrders : null,
+      closedDetail: showClosed
+        ? `${numberFormat.format(dashboardData.closed.closed)} fechadas · ${numberFormat.format(dashboardData.closed.cancelled)} cancelada`
+        : "—",
+      overdue: showOpen ? dashboardData.open.overdue : 0,
+      overdueRate: showOpen ? percent(dashboardData.open.overdue, dashboardData.open.rows) : "0%",
+      unique: showOpen && showClosed
+        ? dashboardData.combinedUnique
+        : showOpen
+          ? dashboardData.open.uniqueOrders
+          : dashboardData.closed.uniqueOrders,
+      overlap: showOpen && showClosed ? dashboardData.overlap : null,
+      totalRows: (showOpen ? dashboardData.open.rows : 0) + (showClosed ? dashboardData.closed.rows : 0),
+    };
+  }
+
+  const dimension = dimensions[0];
+  const value = selected[dimension];
+  const groups = {
+    pole: [dashboardData.open.poles, dashboardData.closed.poles],
+    month: [dashboardData.open.months, dashboardData.closed.months],
+    city: [dashboardData.open.cities, dashboardData.closed.cities],
+    priority: [dashboardData.open.priorities, dashboardData.closed.priorities],
+    family: [dashboardData.open.families, dashboardData.closed.families],
+    status: [dashboardData.open.statuses, dashboardData.closed.statuses],
+  }[dimension];
+  const countFor = (rows) => rows.find((row) =>
+    (dimension === "month" ? row.month : row.label) === value,
+  )?.count || 0;
+  const showOpen = selected.source !== "closed";
+  const showClosed = selected.source !== "open";
+  const openRows = showOpen ? countFor(groups[0]) : 0;
+  const closedRows = showClosed ? countFor(groups[1]) : 0;
+
+  return {
+    openRows,
+    closedRows,
+    openUnique: null,
+    closedDetail: null,
+    overdue: null,
+    overdueRate: null,
+    unique: null,
+    overlap: null,
+    totalRows: openRows + closedRows,
+  };
 }
 
 function normalizeHeader(value) {
@@ -948,8 +1186,8 @@ async function importWorkbooks(openFile, closedFile) {
   for (const orderId of open.orderIds) if (closed.orderIds.has(orderId)) overlap += 1;
 
   return {
-    open: { ...open, orderIds: undefined },
-    closed: { ...closed, orderIds: undefined },
+    open: { ...open, orderIds: undefined, records: undefined },
+    closed: { ...closed, orderIds: undefined, records: undefined },
     records: [...open.records, ...closed.records],
     overlap,
     combinedUnique: open.uniqueOrders + closed.uniqueOrders - overlap,
@@ -964,9 +1202,20 @@ function setFileName(input, target) {
   elements.importError.hidden = true;
 }
 
-document.querySelector("#open-import").addEventListener("click", () => {
+elements.openImport.addEventListener("click", () => {
+  if (!isAdmin) {
+    if (clerkClient) {
+      clerkClient.openSignIn();
+    } else {
+      showToast("O acesso administrativo ainda não foi configurado.");
+    }
+    return;
+  }
   elements.importError.hidden = true;
   elements.importDialog.showModal();
+});
+elements.adminSignOut.addEventListener("click", async () => {
+  if (clerkClient) await clerkClient.signOut();
 });
 document.querySelector("#close-import").addEventListener("click", () => elements.importDialog.close());
 document.querySelector("#cancel-import").addEventListener("click", () => elements.importDialog.close());
@@ -992,17 +1241,24 @@ document.querySelectorAll(".main-nav .nav-link").forEach((link) => {
 
 elements.importForm.addEventListener("submit", async (event) => {
   event.preventDefault();
+  if (!isAdmin) {
+    elements.importDialog.close();
+    showToast("Somente a conta administrativa pode atualizar as planilhas.");
+    return;
+  }
   elements.importError.hidden = true;
   if (!elements.importForm.reportValidity()) return;
 
   elements.submitImport.disabled = true;
-  elements.submitImport.textContent = "Lendo planilhas...";
+  elements.submitImport.textContent = "Lendo e salvando...";
   try {
-    dashboardData = await importWorkbooks(elements.openFile.files[0], elements.closedFile.files[0]);
+    const importedData = await importWorkbooks(elements.openFile.files[0], elements.closedFile.files[0]);
+    await dashboardRequest("POST", importedData);
+    dashboardData = importedData;
     enableDashboardFilters(dashboardData.records);
     renderDashboard();
     elements.importDialog.close();
-    showToast("Indicadores atualizados com as duas planilhas.");
+    showToast("Planilhas publicadas na base privada.");
   } catch (error) {
     elements.importError.textContent = error instanceof Error
       ? error.message
@@ -1015,4 +1271,6 @@ elements.importForm.addEventListener("submit", async (event) => {
 });
 
 document.querySelector("#current-year").textContent = String(new Date().getFullYear());
+enableAggregateFilters();
 renderDashboard();
+initializeAdminAuth();
